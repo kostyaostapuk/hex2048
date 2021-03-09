@@ -156,6 +156,7 @@ class HexagonGrid {
 		return newCoordinates ? item.htmlElement.checkAbilityMerge(newCoordinates.htmlElement) : false;
 	}
 	setDirection(key) {
+		this.axisReverse = false;
 		switch (key) {
 			case 'KeyW':
 				this.currentAxisDirection = 'x';
