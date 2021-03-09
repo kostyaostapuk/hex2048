@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>hex2048</title>
+		<link rel="stylesheet" href="./hexagon.css" />
+	</head>
+	<body>
+		<div id="hexagon-grid">
+			<div id="hexagon-grid-status">
+				Game status:
+				<span data-status></span>
+				<div>Press keys: q, w, e, a, s, d</div>
+			</div>
+		</div>
+
+		<script src="./hexagon.js"></script>
+		<script src="./hexagonGrid.js"></script>
+		<script>
+			new HexagonGrid(document.getElementById('hexagon-grid'));
+		</script>
+	</body>
+</html>
