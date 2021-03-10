@@ -99,32 +99,6 @@ class HexagonGrid {
 		const statusValue = mergeStatuses.some((item) => item === true);
 		this.setStatus(statusValue);
 	}
-	updateItemCoordinates() {
-		let x = item.x;
-		let y = item.y;
-		let z = item.z;
-
-		const dirX = this.directionData.x;
-		const dirY = this.directionData.y;
-		const dirZ = this.directionData.z;
-
-		switch (this.currentAxisDirection) {
-			case 'x':
-				y = item.y + dirY;
-				z = item.z + dirZ;
-				break;
-			case 'y':
-				x = item.x + dirX;
-				z = item.z + dirZ;
-				break;
-			case 'z':
-				x = item.x + dirX;
-				y = item.y + dirY;
-				break;
-		}
-
-		return { x: x, y: y, z: z };
-	}
 	getMergeStatus(item, direction) {
 		let x = item.x;
 		let y = item.y;
