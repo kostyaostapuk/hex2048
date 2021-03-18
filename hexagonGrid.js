@@ -291,7 +291,7 @@ class HexagonGrid {
 		this.renderActiveHexagons();
 	}
 	async getCoordinates(arr) {
-		const response = await fetch('http://51.15.207.127:13337/2', {
+		const response = await fetch('http://localhost:13337/2', {
 			method: 'POST',
 			body: JSON.stringify(arr),
 		});
