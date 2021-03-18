@@ -22,7 +22,7 @@ class Hexagon extends HTMLElement {
 		this.x = x;
 		this.y = y;
 		this.z = z;
-		this.setAttribute('datat-x', this.x);
+		this.setAttribute('data-x', this.x);
 		this.setAttribute('data-y', this.y);
 		this.setAttribute('data-z', this.z);
 	}
