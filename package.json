@@ -1,0 +1,23 @@
+{
+  "name": "hex2048",
+  "version": "1.0.0",
+  "description": "",
+  "main": "hexagon.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server -c-1 -p 3000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kostyaostapuk/hex2048.git"
+  },
+  "author": "Kostya Ostapuk",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kostyaostapuk/hex2048/issues"
+  },
+  "homepage": "https://github.com/kostyaostapuk/hex2048#readme",
+  "dependencies": {
+    "http-server": "^0.12.3"
+  }
+}
