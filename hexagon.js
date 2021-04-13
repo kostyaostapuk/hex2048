@@ -4,31 +4,25 @@ class Hexagon extends HTMLElement {
 		this.value = value;
 		this.valueNode = null;
 
-		if (options) {
-			this.options = options;
-			this.coordinates = this.options.coordinates ? this.options.coordinates : null;
-			this.active = this.options.active ? this.options.active : null;
-		}
+		if(!options) return;
+		this.options = options;
+		this.x = options.x;
+		this.y = options.y;
+		this.z = options.z;
 	}
 	initValue() {
-		if (!this.active) return;
 		const span = document.createElement('span');
 		span.textContent = this.value;
 		this.valueNode = span;
 		this.appendChild(span);
-		this.setAttribute('data-value', this.value);
 	}
-	setCoordinates(x, y, z) {
-		this.x = x;
-		this.y = y;
-		this.z = z;
+	setCoordinates() {
 		this.setAttribute('data-x', this.x);
 		this.setAttribute('data-y', this.y);
 		this.setAttribute('data-z', this.z);
 	}
 	updateValue() {
 		this.valueNode.textContent = this.value;
-		this.setAttribute('data-value', this.value);
 	}
 	checkAbilityMerge(item) {
 		return item.value === this.value ? true : false;
@@ -38,15 +32,10 @@ class Hexagon extends HTMLElement {
 		item.updateValue();
 		this.remove();
 	}
-	setPosition() {
-		this.style.top = this.options.top + 'px';
-		this.style.left = this.options.left + 'px';
-		this.style.zIndex = this.active ? 1 : 0;
-	}
 	connectedCallback() {
 		this.initValue();
-		this.setCoordinates(this.coordinates.x, this.coordinates.y, this.coordinates.z);
-		this.setPosition();
+		this.style.top = this.options.top + 'px';
+		this.style.left = this.options.left + 'px';
 	}
 }
 customElements.define('hexagon-item', Hexagon);

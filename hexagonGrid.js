@@ -1,70 +1,11 @@
-const data = [
-	{
-		x: -1,
-		y: 0,
-		z: 1,
-		top: 103.9,
-		left: 50,
-		htmlElement: null,
-	},
-	{
-		x: -1,
-		y: 1,
-		z: 0,
-		top: 51.95,
-		left: 50,
-		htmlElement: null,
-	},
-
-	{
-		x: 0,
-		y: -1,
-		z: 1,
-		top: 129.875,
-		left: 94,
-		htmlElement: null,
-	},
-	{
-		x: 0,
-		y: 0,
-		z: 0,
-		top: 77.925,
-		left: 94,
-		htmlElement: null,
-	},
-	{
-		x: 0,
-		y: 1,
-		z: -1,
-		top: 25.975,
-		left: 94,
-		htmlElement: null,
-	},
-	{
-		x: 1,
-		y: -1,
-		z: 0,
-		top: 103.9,
-		left: 138,
-		htmlElement: null,
-	},
-	{
-		x: 1,
-		y: 0,
-		z: -1,
-		top: 51.95,
-		left: 138,
-		htmlElement: null,
-	},
-];
 class HexagonGrid {
-	constructor(dom) {
+	constructor(dom, radius) {
 		this.dom = dom;
-		this.data = data;
+		this.radius = radius;
+		this.data = [];
 		this.someMoved = false;
 
-		this.container = document.createElement('div');
-		this.dom.appendChild(this.container);
+		this.container = document.getElementById('hexagon-grid-container');
 
 		this.initEventHandler();
 		this.generateHexagonGrid();
@@ -83,6 +24,38 @@ class HexagonGrid {
 		const status = value ? 'playing' : 'game-over';
 		span.textContent = status;
 		span.setAttribute('data-status', status);
+	}
+	createHexagonSvg(item){
+		debugger
+		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+		svg.setAttribute('fill', 'none');
+		svg.setAttribute('height', "173.205");
+		svg.setAttribute('width', "200");
+		svg.setAttribute('viewBox', '0 0 190 164');
+		svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+		svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+		
+		const path = document.createElementNS(svg.namespaceURI ,'path');
+		path.setAttribute('d','M47.3255 163.2L0 81.836L46.3707 0H142.802L190 82.3093L143.757 163.2H47.3255Z');
+		path.setAttribute('fill', this.setColor.call(item));
+		svg.appendChild(path);
+		return svg;
+	}
+	setColor(){
+		switch(this.value){
+			case 2: return '#ece4db';
+			case 4: return '#ebe0ca';
+			case 8: return '#e9b381';		
+			case 16: return '#e8996c';
+			case 32: return '#e78267';	
+			case 64: return '#e56747';
+			case 128: return '#e8cf7f';
+			default: return '#000000';
+		}
+	}
+	updateColor(item){
+		const path = item.querySelector('path');
+		path.setAttribute('fill', this.setColor.call(item));
 	}
 	checkAllDirections() {
 		const mergeStatuses = [];
@@ -159,7 +132,8 @@ class HexagonGrid {
 				break;
 
 			default:
-				return;
+				this.currentAxisDirection = null;
+			break;
 		}
 	}
 	initEventHandler() {
@@ -178,7 +152,11 @@ class HexagonGrid {
 				this.someMoved = false;
 			})();
 		});
-		document.addEventListener('keyup', () => {
+		document.addEventListener('keyup', (e) => {
+			if (e.repeat) return;
+			this.setDirection(e.code);
+			if (!this.currentAxisDirection) return;
+
 			const timeout = setTimeout(() => {
 				if (this.getActiveItems().length === this.data.length) {
 					this.checkAllDirections();
@@ -199,7 +177,15 @@ class HexagonGrid {
 		});
 		return item;
 	}
+	updateCellValue(item, value){
+		const x = item.x;
+		const y = item.y;
+		const z = item.z;
+		const cell = document.querySelector(`#hexagon-grid > [data-x='${x}'][data-y='${y}'][data-z='${z}']`);
+		cell.setAttribute('data-value', value);
+	}
 	move(item, direction) {
+		const range = this.radius-1;
 		let x = item.x;
 		let y = item.y;
 		let z = item.z;
@@ -227,7 +213,6 @@ class HexagonGrid {
 		}
 
 		stepByAxis(item);
-
 		do {
 			const newCoordinates = this.findItem(direction, x, y, z);
 
@@ -235,26 +220,28 @@ class HexagonGrid {
 			if (!item.htmlElement) return;
 
 			if (!newCoordinates.htmlElement) {
-				item.htmlElement.style.top = newCoordinates.top + 'px';
-				item.htmlElement.style.left = newCoordinates.left + 'px';
+				this.setCellCoordinates(item.htmlElement, newCoordinates.top, newCoordinates.left);
+				this.updateCellValue(item, 0);
 
 				newCoordinates.htmlElement = item.htmlElement;
 
-				item.htmlElement = null;
+				item.htmlElement = null;	
 				item = newCoordinates;
-
-				newCoordinates.htmlElement.setCoordinates(x, y, z);
+				this.updateCellValue(newCoordinates, newCoordinates.htmlElement.value);
 			} else {
 				const canMerge = item.htmlElement.checkAbilityMerge(newCoordinates.htmlElement);
 				if (!canMerge) return;
 
 				item.htmlElement.merge(newCoordinates.htmlElement);
+				this.updateColor(newCoordinates.htmlElement, newCoordinates.htmlElement.value);
+				this.updateCellValue(newCoordinates, newCoordinates.htmlElement.value);
+				this.updateCellValue(item, 0);
 				item.htmlElement = null;
-				newCoordinates.htmlElement.setCoordinates(x, y, z);
 			}
+
 			this.someMoved = true;
 			stepByAxis(newCoordinates);
-		} while (x >= -1 && x <= 1 && y >= -1 && y <= 1 && z >= -1 && z <= 1);
+		} while (x >= -range && x <= range && y >= -range && y <= range && z >= -range && z <= range);
 	}
 	moveItemsByDirection() {
 		this.getActiveItems().forEach((item) => {
@@ -265,9 +252,13 @@ class HexagonGrid {
 	}
 	renderActiveHexagons() {
 		this.getActiveItems().forEach((item) => {
-			if (!item.htmlElement) return;
-			if (item.htmlElement.isConnected) return;
-			this.container.appendChild(item.htmlElement);
+			const hexagon = item.htmlElement;
+			if (!hexagon) return;
+			if (hexagon.isConnected) return;			
+			
+			hexagon.appendChild(this.createHexagonSvg(hexagon));			
+			this.container.appendChild(hexagon);
+			this.updateCellValue(hexagon,hexagon.value);
 		});
 	}
 	parseCoordinates(points) {
@@ -276,14 +267,11 @@ class HexagonGrid {
 				if (item.htmlElement) return;
 				if (point.x === item.x && point.y === item.y && point.z === item.z) {
 					item.htmlElement = new Hexagon(point.value, {
-						active: true,
 						top: item.top,
 						left: item.left,
-						coordinates: {
-							x: point.x,
-							y: point.y,
-							z: point.z,
-						},
+						x: point.x,
+						y: point.y,
+						z: point.z
 					});
 				}
 			});
@@ -291,7 +279,7 @@ class HexagonGrid {
 		this.renderActiveHexagons();
 	}
 	async getCoordinates(arr) {
-		const response = await fetch('http://localhost:13337/2', {
+		const response = await fetch(`http://localhost:13337/${this.radius}`, {
 			method: 'POST',
 			body: JSON.stringify(arr),
 		});
@@ -301,20 +289,67 @@ class HexagonGrid {
 			alert(err.message);
 		}
 	}
-	generateHexagonGrid() {
-		this.data.forEach((point) => {
-			const hex = new Hexagon(null, {
-				active: false,
-				top: point.top,
-				left: point.left,
-				coordinates: {
-					x: point.x,
-					y: point.y,
-					z: point.z,
-				},
-			});
-			this.dom.appendChild(hex);
-		});
+	createCell(data){
+		const { x, y, z, top, left, value } = data;
+		const div = document.createElement('div');
+		div.classList.add('cell');
+
+		div.setAttribute('data-x', x);
+		div.setAttribute('data-y', y);
+		div.setAttribute('data-z', z);
+		div.setAttribute('data-value', value ? value : 0);
+
+		this.setCellCoordinates(div, top, left);
+		return div;
+	}
+	setCellCoordinates(item, top, left){        
+		item.style.top = top + 'px';            
+		item.style.left = left + 'px';          
+	}
+	cubeToEvenq(cube){
+		const col = cube.x
+		const row = cube.z + (cube.x + (cube.x&1)) / 2
+		return {col: col, row: row};
+	}
+	evenqOffsetToPixel(hex){
+		const x = 94 * 3 / 2 * hex.col;
+		const y = 94 * Math.sqrt(3) * (hex.row - 0.5 * (hex.col&1));
+		return { x:x, y:y };
+	}
+	generateHexagonGrid(){
+		const computedStyle = getComputedStyle(this.dom);
+		const offsetY = (parseInt(computedStyle.height)/2) - parseInt(computedStyle.padding);
+		const offsetX = (parseInt(computedStyle.width)/2) - parseInt(computedStyle.padding);
+
+		const range = this.radius - 1;
+		
+		for (let q = -range; q <= range; q++) {
+			let r1 = Math.max(-range, -q - range);
+			let r2 = Math.min(range, -q + range);
+			for (let r = r1; r <= r2; r++) {
+				const x = q;
+				const y = r;
+				const z = -q-r;
+				const coords = this.cubeToEvenq({x: x, y: y, z: z});
+				const coordsPx = this.evenqOffsetToPixel(coords);
+				const left = offsetX + coordsPx.x;
+				const top = offsetY + coordsPx.y;
+
+				const dataCell = {
+					left: left,
+					top:  top,
+					x: x,
+					y: y,
+					z: z,
+				}
+				const gridCell = this.createCell(dataCell);
+				this.dom.appendChild(gridCell);
+				this.data.push({
+					...dataCell,
+					htmlElement: null
+				});
+			}
+		}
 	}
 	getUpdatedDataCoordinates() {
 		return this.getActiveItems().map((item) => {

@@ -12,13 +12,22 @@
 				Game status:
 				<span data-status></span>
 				<div>Press keys: q, w, e, a, s, d</div>
+				<label for="sizes">Select size of hexagon</label>
+				<select id="size" name="sizes">
+					<option value="3">3</option>
+				</select>
 			</div>
+			<div id="hexagon-grid-container"></div>
 		</div>
-
 		<script src="./hexagon.js"></script>
 		<script src="./hexagonGrid.js"></script>
 		<script>
-			new HexagonGrid(document.getElementById('hexagon-grid'));
+			const grid = document.getElementById('hexagon-grid');
+			function getSelectedValue(){
+				debugger
+				return parseInt(sizeSelector.options[sizeSelector.selectedIndex].value);
+			}
+			new HexagonGrid(grid, getSelectedValue());
 		</script>
 	</body>
 </html>
